@@ -1,0 +1,21 @@
+{
+    "name": "issuer",
+    "type": "module",
+    "scripts": {
+        "issuer-init": "tsx src/issuer-init.ts",
+        "did-register": "tsx src/did-register.ts",
+        "did-read": "tsx src/did-read.ts",
+        "vc-issue": "tsx src/vc-issue.ts"
+    },
+    "dependencies": {
+        "@coral-xyz/anchor": "^0.31.1",
+        "@identity.com/sol-did-client": "^3.3.0",
+        "@solana/web3.js": "^1.98.4",
+        "did-jwt": "^8.0.18",
+        "did-jwt-vc": "^4.0.16",
+        "dotenv": "^17.2.2"
+    },
+    "devDependencies": {
+        "tsx": "^4.20.6"
+    }
+}
