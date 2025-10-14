@@ -1,7 +1,9 @@
 {
   "name": "root",
   "workspaces": [
-    "server/*"
+    "client",
+    "server/*",
+    "shared"
   ],
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",

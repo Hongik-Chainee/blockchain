@@ -1,7 +1,24 @@
-.anchor
-.DS_Store
-target
-**/*.rs.bk
-node_modules
-test-ledger
+# Yarn
 .yarn
+
+# Node/TS
+node_modules/
+*.tsbuildinfo
+
+# Env
+.env
+.env.*
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Anchor
+.anchor
+target
+test-ledger
+**/*.rs.bk
+
+# Misc
+.DS_Store

@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { readFileSync } from 'fs';
 import { Connection, Keypair } from '@solana/web3.js';
 import * as solDid from '@identity.com/sol-did-client';
-import { parseCluster, clusterEndpoint, defaultCommitment } from 'shared/src/config/cluster.ts';
+import { parseCluster, clusterEndpoint, defaultCommitment } from '../../../shared/src/config/cluster.ts';
 
 const { DidSolIdentifier, DidSolService } = solDid as any;
 

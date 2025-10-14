@@ -1,0 +1,8 @@
+{
+    "name": "shared",
+    "type": "module",
+    "dependencies": {
+        "@identity.com/sol-did-client": "^3.3.0",
+        "@solana/web3.js": "^1.98.4"
+    }
+}
