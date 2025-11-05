@@ -1,6 +1,6 @@
 import { Cluster, Connection, PublicKey } from "@solana/web3.js";
 import { VerificationMethodType, BitwiseVerificationMethodFlag } from "@identity.com/sol-did-client";
-import { collectVmFragments, newFragment } from "shared/src/util/fragment";
+import { collectFragments, newFragment } from "shared/src/util/fragment";
 import buildService from "shared/src/util/did";
 import finalizeTx from "shared/src/util/finalize";
 
@@ -27,7 +27,7 @@ export async function makeAddVmTx(
     const svc = (await buildService(conn, authority, cluster))
         .withAutomaticAlloc(authority);
     const doc = await svc.resolve();
-    const used = collectVmFragments(doc, baseFragment);
+    const used = collectFragments(doc, baseFragment);
     const newFrag = newFragment(baseFragment, used);
 
     for (const frag of used) {

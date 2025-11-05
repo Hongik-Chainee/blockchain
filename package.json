@@ -1,7 +1,6 @@
 {
   "name": "root",
   "workspaces": [
-    "client",
     "server/*",
     "shared"
   ],

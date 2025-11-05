@@ -1,15 +1,13 @@
 import "dotenv/config";
 import Fastify from "fastify";
-import didRoutes from "./api/did";
-import vcRoutes from "./api/vc";
+import challengeRoutes from "./api/challenge";
 
 const HOST = process.env.HOST!;
 const PORT = Number(process.env.PORT!);
 
 const app = Fastify({ logger: true });
 
-app.register(didRoutes, { prefix: "/api" });
-app.register(vcRoutes, { prefix: "/api" });
+app.register(challengeRoutes, { prefix: "/api" });
 
 app.get("/healthz", async () => ({ ok: true, message: "Server is alive." }));
 
@@ -23,14 +21,14 @@ app.addHook("onSend", async (req, _reply, payload: unknown) => {
 });
 
 app.listen({ port: PORT, host: HOST })
-    .then(() => app.log.info(`🚀 Server is running at http://${HOST}:${PORT}/api.`))
+    .then(() => app.log.info(`🚀 Verifier server running at http://${HOST}:${PORT}/api.`))
     .catch(e => {
         app.log.error(e);
         process.exit(1);
     });
 
 process.on("SIGINT", async () => {
-    app.log.info("Closing server...");
+    app.log.info("Closing verifier server...");
     await app.close();
     process.exit(0);
 });

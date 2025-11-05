@@ -1,11 +1,16 @@
 {
-    "name": "@server/verifier",
+    "name": "verifier",
     "type": "module",
+    "scripts": {
+        "service": "tsx src/server.ts"
+    },
     "dependencies": {
         "@coral-xyz/anchor": "^0.31.1",
         "@identity.com/sol-did-client": "^3.3.0",
         "@solana/web3.js": "^1.98.4",
-        "dotenv": "^17.2.2"
+        "did-jwt-vc": "^4.0.16",
+        "dotenv": "^17.2.2",
+        "jose": "^6.1.0"
     },
     "devDependencies": {
         "tsx": "^4.20.6"
