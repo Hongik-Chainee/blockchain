@@ -1,9 +1,15 @@
 {
-    "compilerOptions": {
-        "moduleResolution": "node",
-        "target": "ES2022",
-        "module": "ESNext",
-        "esModuleInterop": true,
-        "strict": true
-    }
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@config/*": ["shared/src/config/*"],
+      "@type/*": ["shared/src/type/*", "target/types/*"],
+      "@util/*": ["shared/src/util/*"]
+    },
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "module": "ESNext",
+    "esModuleInterop": true,
+    "strict": true
+  }
 }
