@@ -76,7 +76,7 @@ pub struct CreateContract<'info> {
 }
 
 #[derive(Accounts)]
-pub struct CompleteContract<'info> {
+pub struct EndContract<'info> {
     #[account(mut)]
     /// CHECK: This is the employer account, used as the refund recipient.
     pub employer: UncheckedAccount<'info>,
@@ -105,7 +105,7 @@ pub struct CompleteContract<'info> {
 }
 
 #[derive(Accounts)]
-pub struct TerminateContract<'info> {
+pub struct ExpireContract<'info> {
     #[account(mut, address=escrow.employer)]
     /// CHECK: This is the employer account, used as the refund recipient.
     pub employer: UncheckedAccount<'info>,
@@ -189,7 +189,7 @@ pub mod contract_program {
         Ok(())
     }
 
-    pub fn complete_contract(ctx: Context<CompleteContract>, amount: u64) -> Result<()> {
+    pub fn end_contract(ctx: Context<EndContract>, amount: u64) -> Result<()> {
         let contract = &mut ctx.accounts.contract;
         let escrow = &mut ctx.accounts.escrow;
 
@@ -246,7 +246,7 @@ pub mod contract_program {
         Ok(())
     }
 
-    pub fn terminate_contract(ctx: Context<TerminateContract>) -> Result<()> {
+    pub fn expire_contract(ctx: Context<ExpireContract>) -> Result<()> {
         let escrow = &mut ctx.accounts.escrow;
         let contract = &mut ctx.accounts.contract;
 

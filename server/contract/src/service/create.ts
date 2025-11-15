@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { Program, AnchorProvider } from "@coral-xyz/anchor";
+import { Program, AnchorProvider, BN } from "@coral-xyz/anchor";
 import { ContractProgram } from "@type/contract_program";
 import { buildCreateContractTx } from "../lib/build-tx";
 import {
@@ -31,6 +31,9 @@ export default async function createContract(
     });
     const program = new Program<ContractProgram>(IDL, provider);
     const seed = Buffer.from(String(Date.now()));
+    const salaryBN = new BN(salary.toString());
+    const startDateBN = new BN(startDate);
+    const dueDateBN = new BN(dueDate);
 
     const { tx, blockhash, lastValidBlockHeight, contract, escrow } =
       await buildCreateContractTx(
@@ -38,9 +41,9 @@ export default async function createContract(
         program,
         employer,
         employee,
-        salary,
-        startDate,
-        dueDate,
+        salaryBN,
+        startDateBN,
+        dueDateBN,
         seed
       );
 

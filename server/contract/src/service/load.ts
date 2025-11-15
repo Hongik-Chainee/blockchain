@@ -7,7 +7,7 @@ import {
   clusterEndpoint,
   defaultCommitment,
 } from "@config/cluster";
-import { contractDataToJson, ContractData } from "../lib/encode";
+import { resolveContract, ContractData } from "../lib/resolve";
 
 const IDL = loadIdl(process.env.IDL!);
 const CLUSTER = parseCluster(process.env.CLUSTER!);
@@ -16,7 +16,7 @@ const endpoint = clusterEndpoint(CLUSTER);
 const commitment = defaultCommitment(CLUSTER);
 const connection = new Connection(endpoint, { commitment });
 
-export async function loadContractService(contract: PublicKey) {
+export async function loadContract(contract: PublicKey) {
   try {
     const provider = new AnchorProvider(connection, {
       publicKey: new PublicKey(0),
@@ -32,7 +32,7 @@ export async function loadContractService(contract: PublicKey) {
     return {
       ok: true,
       message: "Contract loaded successfully.",
-      contract: contractDataToJson(contractData),
+      contract: resolveContract(contractData),
     };
   } catch (e) {
     return { ok: false, message: "Failed to load contract." };

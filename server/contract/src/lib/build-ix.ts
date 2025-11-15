@@ -10,9 +10,9 @@ export async function buildCreateContractIx(
   program: Program<ContractProgram>,
   employer: PublicKey,
   employee: PublicKey,
-  salary: bigint,
-  startDate: number,
-  dueDate: number,
+  salary: BN,
+  startDate: BN,
+  dueDate: BN,
   seed: Buffer
 ): Promise<{
   ix: TransactionInstruction;
@@ -29,11 +29,7 @@ export async function buildCreateContractIx(
   );
 
   const ix = await program.methods
-    .createContract(
-      new BN(salary.toString()),
-      new BN(startDate),
-      new BN(dueDate)
-    )
+    .createContract(salary, startDate, dueDate)
     .accounts({
       employer,
       employee,
@@ -45,16 +41,16 @@ export async function buildCreateContractIx(
   return { ix, contract, escrow };
 }
 
-export async function buildCompleteContractIx(
+export async function buildEndContractIx(
   program: Program<ContractProgram>,
   employer: PublicKey,
   employee: PublicKey,
   contract: PublicKey,
   escrow: PublicKey,
-  amount: bigint
+  amount: BN
 ): Promise<TransactionInstruction> {
   const ix = await program.methods
-    .completeContract(new BN(amount.toString()))
+    .completeContract(amount)
     .accounts({
       employer,
       employee,
@@ -67,7 +63,7 @@ export async function buildCompleteContractIx(
   return ix;
 }
 
-export async function buildTerminateContractIx(
+export async function buildExpireContractIx(
   program: Program<ContractProgram>,
   employer: PublicKey,
   contract: PublicKey,

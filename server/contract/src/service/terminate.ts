@@ -1,8 +1,8 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { Program, AnchorProvider } from "@coral-xyz/anchor";
 import type { ContractProgram } from "@type/contract_program";
-import { terminateContractTx } from "../lib/build-tx";
-import { contractDataToJson, ContractData } from "../lib/encode";
+import { buildExpireContractTx } from "../lib/build-tx";
+import { resolveContract, ContractData } from "../lib/resolve";
 import {
   parseCluster,
   clusterEndpoint,
@@ -20,7 +20,7 @@ const commitment = defaultCommitment(CLUSTER);
 const connection = new Connection(endpoint, { commitment });
 const platform = loadKey(KEYFILE);
 
-export default async function terminateContractService(
+export default async function terminateContract(
   employer: PublicKey,
   contract: PublicKey,
   escrow: PublicKey
@@ -29,7 +29,7 @@ export default async function terminateContractService(
     const wallet = new NodeWallet(platform);
     const provider = new AnchorProvider(connection, wallet);
     const program = new Program<ContractProgram>(IDL, provider);
-    const { tx, blockhash, lastValidBlockHeight } = await terminateContractTx(
+    const { tx, blockhash, lastValidBlockHeight } = await buildExpireContractTx(
       connection,
       program,
       platform.publicKey,
@@ -51,7 +51,7 @@ export default async function terminateContractService(
     return {
       ok: true,
       message: "Contract terminated.",
-      contract: contractDataToJson(contractData),
+      contract: resolveContract(contractData),
       signature,
     };
   } catch (e) {

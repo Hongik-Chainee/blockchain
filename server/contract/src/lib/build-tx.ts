@@ -1,10 +1,10 @@
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
-import { Program } from "@coral-xyz/anchor";
+import { BN, Program } from "@coral-xyz/anchor";
 import { ContractProgram } from "@type/contract_program";
 import {
   buildCreateContractIx,
-  buildCompleteContractIx,
-  buildTerminateContractIx,
+  buildEndContractIx,
+  buildExpireContractIx,
   buildCloseEscrowIx,
 } from "./build-ix";
 import finalizeTx from "@util/finalize";
@@ -14,9 +14,9 @@ export async function buildCreateContractTx(
   program: Program<ContractProgram>,
   employer: PublicKey,
   employee: PublicKey,
-  salary: bigint,
-  startDate: number,
-  dueDate: number,
+  salary: BN,
+  startDate: BN,
+  dueDate: BN,
   seed: Buffer
 ): Promise<{
   tx: Transaction;
@@ -45,7 +45,7 @@ export async function buildCreateContractTx(
   return { tx: finalizedTx, blockhash, lastValidBlockHeight, contract, escrow };
 }
 
-export async function buildCompleteContractTx(
+export async function buildEndContractTx(
   conn: Connection,
   program: Program<ContractProgram>,
   platform: PublicKey,
@@ -53,13 +53,13 @@ export async function buildCompleteContractTx(
   employee: PublicKey,
   contract: PublicKey,
   escrow: PublicKey,
-  amount: bigint
+  amount: BN
 ): Promise<{
   tx: Transaction;
   blockhash: string;
   lastValidBlockHeight: number;
 }> {
-  const completeIx = await buildCompleteContractIx(
+  const completeIx = await buildEndContractIx(
     program,
     employer,
     employee,
@@ -80,7 +80,7 @@ export async function buildCompleteContractTx(
   return { tx: finalizedTx, blockhash, lastValidBlockHeight };
 }
 
-export async function terminateContractTx(
+export async function buildExpireContractTx(
   conn: Connection,
   program: Program<ContractProgram>,
   platform: PublicKey,
@@ -92,7 +92,7 @@ export async function terminateContractTx(
   blockhash: string;
   lastValidBlockHeight: number;
 }> {
-  const terminateIx = await buildTerminateContractIx(
+  const terminateIx = await buildExpireContractIx(
     program,
     employer,
     contract,
