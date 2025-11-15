@@ -7,7 +7,7 @@ import {
   clusterEndpoint,
   defaultCommitment,
 } from "@config/cluster";
-import { resolveContract, ContractData } from "../lib/resolve";
+import { resolveContract } from "../lib/resolve";
 
 const IDL = loadIdl(process.env.IDL!);
 const CLUSTER = parseCluster(process.env.CLUSTER!);
@@ -16,7 +16,7 @@ const endpoint = clusterEndpoint(CLUSTER);
 const commitment = defaultCommitment(CLUSTER);
 const connection = new Connection(endpoint, { commitment });
 
-export async function loadContract(contract: PublicKey) {
+export default async function loadContract(contract: PublicKey) {
   try {
     const provider = new AnchorProvider(connection, {
       publicKey: new PublicKey(0),
@@ -25,9 +25,7 @@ export async function loadContract(contract: PublicKey) {
     });
     const program = new Program<ContractProgram>(IDL, provider);
 
-    const contractData = (await program.account.contract.fetch(
-      contract
-    )) as ContractData;
+    const contractData = await program.account.contract.fetch(contract);
 
     return {
       ok: true,

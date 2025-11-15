@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { PublicKey } from "@solana/web3.js";
 import { initializeHolderDid } from "../service/initialize";
 import { addHolderVm } from "../service/add-vm";
+import { readHolderDidDoc } from "../service/read";
 
 export default async function didRoutes(app: FastifyInstance) {
   app.post("/did/init", {
@@ -33,6 +34,23 @@ export default async function didRoutes(app: FastifyInstance) {
       const authority = new PublicKey(holder);
       const result = await addHolderVm(authority);
       return reply.send(result);
+    },
+  });
+
+  app.get("/did/read", {
+    schema: {
+      querystring: {
+        type: "object",
+        required: ["holder"],
+        properties: {
+          holder: { type: "string", minLength: 32 },
+        },
+      },
+    },
+    handler: async (req, reply) => {
+      const { holder } = req.query as { holder: string };
+      const result = await readHolderDidDoc(new PublicKey(holder));
+      reply.send(result);
     },
   });
 }

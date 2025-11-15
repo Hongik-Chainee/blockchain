@@ -2,7 +2,7 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { Program, AnchorProvider } from "@coral-xyz/anchor";
 import type { ContractProgram } from "@type/contract_program";
 import { buildExpireContractTx } from "../lib/build-tx";
-import { resolveContract, ContractData } from "../lib/resolve";
+import { resolveContract } from "../lib/resolve";
 import {
   parseCluster,
   clusterEndpoint,
@@ -20,7 +20,7 @@ const commitment = defaultCommitment(CLUSTER);
 const connection = new Connection(endpoint, { commitment });
 const platform = loadKey(KEYFILE);
 
-export default async function terminateContract(
+export default async function expireContract(
   employer: PublicKey,
   contract: PublicKey,
   escrow: PublicKey
@@ -44,9 +44,7 @@ export default async function terminateContract(
       commitment
     );
 
-    const contractData = (await program.account.contract.fetch(
-      contract
-    )) as ContractData;
+    const contractData = await program.account.contract.fetch(contract);
 
     return {
       ok: true,

@@ -10,7 +10,6 @@ import {
 } from "@config/cluster";
 import { loadIdl, loadKey } from "@util/load";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
-import { Status } from "@type/contract";
 
 const KEYFILE = process.env.KEYFILE!;
 const IDL = loadIdl(process.env.IDL!);
@@ -51,18 +50,7 @@ export default async function endContract(
       commitment
     );
 
-    const fetchedContract = await program.account.contract.fetch(contract);
-    const now = Math.floor(Date.now() / 1000);
-    const nowBN = new BN(now);
-    let status;
-    if (nowBN.lt(fetchedContract.startDate)) {
-      status = Status[3];
-    } else if (amount == 0n) {
-      status = nowBN.lt(fetchedContract.endDate) ? Status[4] : Status[5];
-    } else {
-      status = Status[2];
-    }
-    const contractData = { ...fetchedContract, status };
+    const contractData = await program.account.contract.fetch(contract);
 
     return {
       ok: true,

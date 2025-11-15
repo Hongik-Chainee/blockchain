@@ -13,6 +13,5 @@ export function resolveContract(contract: ContractData) {
     endDate: contract.endDate.toString(),
     createdAt: contract.createdAt.toString(),
     updatedAt: contract.updatedAt.toString(),
-    status: contract.status,
   };
 }
