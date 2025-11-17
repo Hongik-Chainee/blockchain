@@ -6,8 +6,8 @@ node_modules/
 *.tsbuildinfo
 
 # Env
-.env
-.env.*
+#.env
+#.env.*
 
 # Next.js
 .next/
