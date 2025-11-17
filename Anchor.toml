@@ -8,12 +8,15 @@ skip-lint = false
 [programs.localnet]
 blockchain = "2jvBhHuURWmSPevRB1YU21nBteh6gQGoLnEZdmMyjPXb"
 
+[programs.devnet]
+blockchain = "2CNXkeWK5eC2qUQ9vd9P9LgoF8uW3wqXvVBRSu1ZKJVa"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
-wallet = "~/.config/solana/id.json"
+cluster = "devnet"
+wallet = "~/.config/solana/platform.json"
 
 [scripts]
 test = "yarn run mocha -t 1000000 tests/"

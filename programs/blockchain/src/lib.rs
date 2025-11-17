@@ -3,7 +3,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program;
 
-declare_id!("2jvBhHuURWmSPevRB1YU21nBteh6gQGoLnEZdmMyjPXb");
+declare_id!("2CNXkeWK5eC2qUQ9vd9P9LgoF8uW3wqXvVBRSu1ZKJVa");
 
 const COMPLETE_FEE: u64 = 5;
 const DEFAULT_FEE: u64 = 1;
