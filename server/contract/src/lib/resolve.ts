@@ -1,5 +1,5 @@
 import bs58 from "bs58";
-import { ContractData } from "@type/contract";
+import ContractData from "@type/contract";
 
 export function resolveContract(contract: ContractData) {
   return {
