@@ -75,7 +75,7 @@ export async function buildEndContractTx(
     tx: finalizedTx,
     blockhash,
     lastValidBlockHeight,
-  } = await finalizeTx(conn, tx, employer);
+  } = await finalizeTx(conn, tx, platform);
 
   return { tx: finalizedTx, blockhash, lastValidBlockHeight };
 }
@@ -106,7 +106,7 @@ export async function buildExpireContractTx(
     tx: finalizedTx,
     blockhash,
     lastValidBlockHeight,
-  } = await finalizeTx(conn, tx, employer);
+  } = await finalizeTx(conn, tx, platform);
 
   return { tx: finalizedTx, blockhash, lastValidBlockHeight };
 }

@@ -54,7 +54,7 @@ export async function makeAddVmTx(
     },
     authority
   );
-
   const tx = await svc.transaction();
+
   return finalizeTx(conn, tx, authority);
 }

@@ -20,42 +20,48 @@
 * employer: 고용주의 PublicKey
 * employee: 고용인의 PublicKey
 * amount: 실제 보수
-* fee: 수수료. 현재는 계약이 완료되었을 경우 5%, 완료되지 못했을 경우 1%로 책정되어 있다.
+* fee: 수수료. 현재는 계약을 완료했을 경우 5%, 완료하지 못했을 경우 1%로 책정되어 있다.
 * bump: Escrow의 bump
 * released: 보수 지급 & 잔금 반환 여부. 보수 지급과 잔금 반환이 모두 완료되어 Escrow 계정에 수수료(fee)만큼의 액수만 남아있는 상태일 때 released = true이다.
+### 2.3. Badge
 
 ## 3. Contexts
 ### 3.1. CreateContract
-createContract instruction에 사용되는 context이다.
+create_contract instruction에 사용되는 context이다.
 * Signer: employer, employee(multi-sig)
 * Account: contract, escrow
 ### 3.2. EndContract
-endContract instruction에 사용되는 context이다.
+end_contract instruction에 사용되는 context이다.
 * Signer: none
 * Account: employer, employee, contract, escrow
 ### 3.3. ExpireContract
-expireContract instruction에 사용되는 context이다.
+expire_contract instruction에 사용되는 context이다.
 * Signer: none
 * Account: employer, contract, escrow
+### 3.4. MintBadge
+mint_badge instruction에 사용되는 context이다.
+* Signer: platform
+* Account: employee, escrow
 ### 3.4. CloseEscrow
-closeEscrow instruction에 사용되는 context이다.
+close_escrow instruction에 사용되는 context이다.
 * Signer: platform
 * Account: escrow
 
 ## 4. Instructions
-### 4.1. createContract(salary, start_date, due_date)
+### 4.1. create_contract(salary, start_date, due_date)
 계약 사항을 on-chain에 게시하고 escrow에 보수를 예치한다.
-### 4.2. endContract(amount)
+### 4.2. end_contract(amount)
 실제 지급될 보수를 확정하여 지급하고 계약을 종료한다. amount가 0일 경우 계약이 해제된 것으로 간주하여 1%의 수수료가 적용된다.
-### 4.3. expireContract()
+### 4.3. expire_contract()
 end_date가 지나 효력이 없는 계약을 파기하고 예치금을 employer에게 반환한다. 1%의 수수료가 적용된다. Solana에는 일시에 맞춰 instruction을 자동 실행하는 기능이 없기 때문에 반드시 off-chain에서 트랜잭션을 전송하는 기능을 구현해야 한다.
-### 4.4. closeEscrow()
-잔금을 platform으로 전송하고 escrow를 닫는다. closeEscrow가 실행되는 시점의 escrow에는 항상 수수료만큼의 잔금만이 남는다.
+### 4.4. mint_badge
+### 4.5. close_escrow()
+잔금을 platform으로 전송하고 escrow를 닫는다. close_escrow가 실행되는 시점의 escrow에는 항상 수수료만큼의 잔금만이 남는다.
 
 ## 5. Transactions
-* createContract
-* endContract + closeEscrow
-* expireContract + closeEscrow
+* create_contract
+* end_contract + mint_badge + close_escrow
+* expire_contract + close_escrow
 
 ## 6. Terminology
 * account: PublicKey로 식별되는 모든 on-chain 객체(wallet, PDA, system program, etc.)
@@ -64,7 +70,8 @@ end_date가 지나 효력이 없는 계약을 파기하고 예치금을 employer
 * bump: PDA가 유효한 계정이 될 수 있도록 seeds에 추가되는 1바이트 값
 * program signer: PDA를 다르게 이르는 말. PDA는 서명할 수 없지만 program이 대신 서명하며 PDA가 서명한 것처럼 동작한다.
 * context: Anchor에서 제공하는 Solana 전용 계정 정의 구조체
-* signer: 서명의 주체가 되는 계정. multi-sig에서는 payer가 명시되지 않았을 경우 마지막으로 서명한 Signer가 payer로 지정된다.
-* payer: fee를 지불하는 계정
+* signer: 서명의 주체가 되는 계정. multi-sig에서는 feepayer가 명시되지 않았을 경우 처음으로 서명한 Signer가 feepayer로 지정된다.
+* payer: 계정 생성 비용을 지불하는 계정
+* feepayer: 트랜잭션 수수료를 지불하는 계정
 * instruction: on-chain에서 실행되는 함수. instruction이 모여 transaction을 구성한다.
-* transaction: on-chain에 실제로 저장되는 데이터. 한 트랜잭션에는 반드시 하나 이상의 signer와 정확히 하나의 payer가 필요하다.
+* transaction: on-chain에 실제로 저장되는 데이터. 한 트랜잭션에는 반드시 하나 이상의 signer와 정확히 하나의 feeayer가 필요하다.

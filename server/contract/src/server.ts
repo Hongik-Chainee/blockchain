@@ -1,11 +1,18 @@
 import "dotenv/config";
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 import contractRoutes from "./api/contract";
 
 const HOST = process.env.HOST!;
 const PORT = Number(process.env.PORT!);
 
 const app = Fastify({ logger: true });
+
+await app.register(cors, {
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+});
 
 app.register(contractRoutes, { prefix: "/api" });
 

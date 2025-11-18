@@ -37,6 +37,10 @@ pub struct Contract {
     pub updated_at: i64,
 }
 
+impl Contract {
+    pub const LEN: usize = 32 + 32 + 32 + 8 + 8 + 8 + 8 + 8 + 8 + 8;
+}
+
 #[account]
 pub struct Escrow {
     pub contract: Pubkey,
@@ -46,6 +50,33 @@ pub struct Escrow {
     pub fee: u8,
     pub bump: u8,
     pub released: bool,
+    pub _padding: [u8; 5],
+}
+
+impl Escrow {
+    pub const LEN: usize = 32 + 32 + 32 + 8 + 1 + 1 + 1 + 5;
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy)]
+pub enum BadgeLevel {
+    Bronze = 1,
+    Silver = 2,
+    Gold = 3,
+    Platinum = 4,
+}
+
+#[account]
+pub struct Badge {
+    pub contract: Pubkey,
+    pub employee: Pubkey,
+    pub level: BadgeLevel,
+    pub uri: String,
+    pub minted_at: i64,
+    pub _padding: [u8; 3],
+}
+
+impl Badge {
+    pub const LEN: usize = 32 + 32 + 1 + 4 + 200 + 8 + 3;
 }
 
 #[derive(Accounts)]
@@ -59,7 +90,7 @@ pub struct CreateContract<'info> {
     #[account(
         init,
         payer = employer,
-        space = 168,
+        space = 8 + Contract::LEN,
     )]
     pub contract: Account<'info, Contract>,
 
@@ -68,7 +99,7 @@ pub struct CreateContract<'info> {
         payer = employer,
         seeds = [b"escrow", contract.key().as_ref()],
         bump,
-        space = 120,
+        space = 8 + Escrow::LEN,
     )]
     pub escrow: Account<'info, Escrow>,
 
@@ -78,11 +109,11 @@ pub struct CreateContract<'info> {
 #[derive(Accounts)]
 pub struct EndContract<'info> {
     #[account(mut)]
-    /// CHECK: This is the employer account, used as the refund recipient.
+    /// CHECK: Employer account for reference only
     pub employer: UncheckedAccount<'info>,
 
     #[account(mut)]
-    /// CHECK: This is the employee account, used as the recipient of salary payments.
+    /// CHECK: Employee account for reference only
     pub employee: UncheckedAccount<'info>,
 
     #[account(
@@ -96,7 +127,8 @@ pub struct EndContract<'info> {
         mut,
         has_one = employer,
         has_one = employee,
-        constraint = escrow.contract == contract.key() @ Error::InvalidContract,
+        seeds = [b"escrow", escrow.contract.as_ref()],
+        bump = escrow.bump,
         constraint = !escrow.released @ Error::EscrowAlreadyReleased,
     )]
     pub escrow: Account<'info, Escrow>,
@@ -107,22 +139,56 @@ pub struct EndContract<'info> {
 #[derive(Accounts)]
 pub struct ExpireContract<'info> {
     #[account(mut, address=escrow.employer)]
-    /// CHECK: This is the employer account, used as the refund recipient.
+    /// CHECK: Employer account for reference only
     pub employer: UncheckedAccount<'info>,
 
     #[account(
         mut,
-        has_one = employer
+        has_one = employer,
     )]
     pub contract: Account<'info, Contract>,
 
     #[account(
         mut,
         has_one = employer,
-        constraint = escrow.contract == contract.key() @ Error::InvalidContract,
+        seeds = [b"escrow", escrow.contract.as_ref()],
+        bump = escrow.bump,
         constraint = !escrow.released @ Error::EscrowAlreadyReleased,
     )]
     pub escrow: Account<'info, Escrow>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct MintBadge<'info> {
+    /// CHECK: Employee account for reference only
+    pub employee: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub platform: Signer<'info>,
+
+    #[account(
+        has_one = employee,
+    )]
+    pub contract: Account<'info, Contract>,
+
+    #[account(
+        has_one = employee,
+        seeds = [b"escrow", escrow.contract.as_ref()],
+        bump = escrow.bump,
+        constraint = escrow.released @ Error::EscrowNotReleased,
+    )]
+    pub escrow: Account<'info, Escrow>,
+
+    #[account(
+        init,
+        payer = platform,
+        seeds = [b"badge", contract.key().as_ref(), employee.key().as_ref()],
+        bump,
+        space = 8 + Badge::LEN
+    )]
+    pub badge: Account<'info, Badge>,
 
     pub system_program: Program<'info, System>,
 }
@@ -272,6 +338,37 @@ pub mod contract_program {
         contract.updated_at = contract.end_date;
 
         escrow.released = true;
+
+        Ok(())
+    }
+
+    pub fn mint_badge(ctx: Context<MintBadge>, uri: String) -> Result<()> {
+        let badge = &mut ctx.accounts.badge;
+        let contract = &ctx.accounts.contract;
+
+        require!(contract.amount > 0, Error::InvalidAmount);
+
+        let pct = contract
+            .amount
+            .checked_mul(100)
+            .ok_or(Error::InvalidAmount)?
+            .checked_div(contract.salary)
+            .ok_or(Error::InvalidAmount)?;
+        let level = if pct >= 100 {
+            BadgeLevel::Platinum
+        } else if pct >= 75 {
+            BadgeLevel::Gold
+        } else if pct >= 50 {
+            BadgeLevel::Silver
+        } else {
+            BadgeLevel::Bronze
+        };
+
+        badge.contract = contract.key();
+        badge.employee = contract.employee;
+        badge.level = level;
+        badge.uri = uri;
+        badge.minted_at = Clock::get()?.unix_timestamp;
 
         Ok(())
     }

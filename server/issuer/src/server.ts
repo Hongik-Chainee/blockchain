@@ -1,5 +1,6 @@
 import "dotenv/config";
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 import didRoutes from "./api/did";
 import vcRoutes from "./api/vc";
 
@@ -7,6 +8,12 @@ const HOST = process.env.HOST!;
 const PORT = Number(process.env.PORT!);
 
 const app = Fastify({ logger: true });
+
+await app.register(cors, {
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+});
 
 app.register(didRoutes, { prefix: "/api" });
 app.register(vcRoutes, { prefix: "/api" });

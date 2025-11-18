@@ -50,7 +50,7 @@ export async function buildEndContractIx(
   amount: BN
 ): Promise<TransactionInstruction> {
   const ix = await program.methods
-    .completeContract(amount)
+    .endContract(amount)
     .accounts({
       employer,
       employee,
@@ -70,7 +70,7 @@ export async function buildExpireContractIx(
   escrow: PublicKey
 ): Promise<TransactionInstruction> {
   const ix = await program.methods
-    .terminateContract()
+    .expireContract()
     .accounts({
       employer,
       contract,
