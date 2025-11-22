@@ -10,11 +10,11 @@
 * employee: 고용인의 PublicKey
 * salary: 공고 상의 보수. 고용주가 지급할 수 있는 보수의 최댓값이다.
 * amount: 실제 보수
-* startDate: 계약의 시작일시
-* dueDate: 계약 종료일시. 고용인은 이 때까지 계약 사항을 이행해야 한다.
-* endDate: 계약 시한. dueDate로부터 2주 뒤로 고용주와 고용인은 이 2주간 결과물을 확인하여 보수(amount)를 확정한다. endDate가 지나고도 종료되지 않은 계약은 파기되고 Escrow의 잔금은 수수료를 제외, 전부 고용주에게 반환된다.
-* createdAt: 계약서 생성일시.
-* updatedAt: 계약서의 최종 수정일시.
+* start_date: 계약의 시작일시
+* due_date: 계약 종료일시. 고용인은 이 때까지 계약 사항을 이행해야 한다.
+* end_date: 계약 시한. due_date로부터 2주 뒤로 고용주와 고용인은 이 2주간 결과물을 확인하여 보수(amount)를 확정한다. end_date가 지나고도 종료되지 않은 계약은 파기되고 Escrow의 잔금은 수수료를 제외, 전부 고용주에게 반환된다.
+* created_at: 계약서 생성일시.
+* updated_at: 계약서의 최종 수정일시.
 ### 2.2. Escrow
 * contract: Contract의 PublicKey(PDA)
 * employer: 고용주의 PublicKey
@@ -24,6 +24,11 @@
 * bump: Escrow의 bump
 * released: 보수 지급 & 잔금 반환 여부. 보수 지급과 잔금 반환이 모두 완료되어 Escrow 계정에 수수료(fee)만큼의 액수만 남아있는 상태일 때 released = true이다.
 ### 2.3. Badge
+* contract: Contract의 PublicKey(PDA)
+* employee: 고용인의 PublicKey
+* level: badge의 level. 4단계로 구분되며 산정 기준은 100 * amount / salary(%)이 100일 때 Platinum, 100 미만 75 이상일 때 Gold, 75 미만 50 이상일 때 Silver, 50 미만일 때 Bronze이다.
+* uri: badge 이미지의 uri
+* minted_at: mint 일시
 
 ## 3. Contexts
 ### 3.1. CreateContract
@@ -55,15 +60,22 @@ close_escrow instruction에 사용되는 context이다.
 ### 4.3. expire_contract()
 end_date가 지나 효력이 없는 계약을 파기하고 예치금을 employer에게 반환한다. 1%의 수수료가 적용된다. Solana에는 일시에 맞춰 instruction을 자동 실행하는 기능이 없기 때문에 반드시 off-chain에서 트랜잭션을 전송하는 기능을 구현해야 한다.
 ### 4.4. mint_badge
+badge 정보를 on-chain에 저장한다. 이 정보에는 shadow drive에 업로드된 이미지의 uri가 포함된다.
 ### 4.5. close_escrow()
 잔금을 platform으로 전송하고 escrow를 닫는다. close_escrow가 실행되는 시점의 escrow에는 항상 수수료만큼의 잔금만이 남는다.
 
 ## 5. Transactions
 * create_contract
-* end_contract + mint_badge + close_escrow
+* end_contract + close_escrow
 * expire_contract + close_escrow
+* mint_badge
 
-## 6. Terminology
+## 6. Badge minting
+계약이 이미 종료되었음을 전제로 badge가 mint되는 과정만을 다룬다. 아래의 흐름은 한 함수 내에서 이뤄지지만 별개의 트랜잭션으로 작동된다. 따라서 클라이언트가 한 번 요청하면 서버는 두 번의 서명을 진행해야 한다.
+1. upload_image: employer가 공고를 게시할 때 사용되었던 프로젝트 대표 이미지 혹은 employer의 프로필 이미지를 shadow drive에 업로드한다.
+2. mint_badge: 업로드한 이미지의 uri를 반환받아 이를 포함한 모든 badge 계정 정보를 입력하여 on-chain에 저장한다.
+
+## 7. Terminology
 * account: PublicKey로 식별되는 모든 on-chain 객체(wallet, PDA, system program, etc.)
 * PDA(Program Derived Address): PublicKey는 계정 식별자일 뿐 어떠한 권한도 가지지 않는다. 실제 서명의 권한을 갖는 것은 PrivateKey이다. 그런데 Solana에서는 Program의 서명 권한 대행을 허용한다. 따라서 PublicKey만을 갖는 계정이 존재할 수 있는데 이것을 PDA라 한다.
 * seeds: PDA를 생성할 때 사용되는 입력값이 포함된 배열
