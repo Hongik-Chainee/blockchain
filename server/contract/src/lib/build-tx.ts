@@ -6,6 +6,7 @@ import {
   buildEndContractIx,
   buildExpireContractIx,
   buildCloseEscrowIx,
+  buildMintBadgeIx,
 } from "./build-ix";
 import finalizeTx from "@util/finalize";
 
@@ -109,4 +110,39 @@ export async function buildExpireContractTx(
   } = await finalizeTx(conn, tx, platform);
 
   return { tx: finalizedTx, blockhash, lastValidBlockHeight };
+}
+
+export async function buildMintBadgeTx(
+  conn: Connection,
+  program: Program<ContractProgram>,
+  employee: PublicKey,
+  platform: PublicKey,
+  contract: PublicKey,
+  escrow: PublicKey,
+  uri: string,
+  level: number
+): Promise<{
+  tx: Transaction;
+  blockhash: string;
+  lastValidBlockHeight: number;
+  badge: PublicKey;
+}> {
+  const { ix, badge } = await buildMintBadgeIx(
+    program,
+    employee,
+    platform,
+    contract,
+    escrow,
+    uri,
+    level
+  );
+
+  const tx = new Transaction().add(ix);
+  const {
+    tx: finalizedTx,
+    blockhash,
+    lastValidBlockHeight,
+  } = await finalizeTx(conn, tx, platform);
+
+  return { tx: finalizedTx, blockhash, lastValidBlockHeight, badge };
 }

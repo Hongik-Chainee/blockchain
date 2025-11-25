@@ -21,6 +21,8 @@ pub enum Error {
     EscrowNotReleased,
     #[msg("Contract not ended")]
     ContractNotEnded,
+    #[msg("Invalid badge level")]
+    InvalidBadgeLevel,
 }
 
 #[account]
@@ -57,7 +59,7 @@ impl Escrow {
     pub const LEN: usize = 32 + 32 + 32 + 8 + 1 + 1 + 1 + 5;
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
 pub enum BadgeLevel {
     Bronze = 1,
     Silver = 2,
@@ -342,7 +344,7 @@ pub mod contract_program {
         Ok(())
     }
 
-    pub fn mint_badge(ctx: Context<MintBadge>, uri: String) -> Result<()> {
+    pub fn mint_badge(ctx: Context<MintBadge>, uri: String, level: BadgeLevel) -> Result<()> {
         let badge = &mut ctx.accounts.badge;
         let contract = &ctx.accounts.contract;
 
@@ -354,7 +356,7 @@ pub mod contract_program {
             .ok_or(Error::InvalidAmount)?
             .checked_div(contract.salary)
             .ok_or(Error::InvalidAmount)?;
-        let level = if pct >= 100 {
+        let calculated_level = if pct >= 100 {
             BadgeLevel::Platinum
         } else if pct >= 75 {
             BadgeLevel::Gold
@@ -363,6 +365,8 @@ pub mod contract_program {
         } else {
             BadgeLevel::Bronze
         };
+
+        require!(level == calculated_level, Error::InvalidBadgeLevel);
 
         badge.contract = contract.key();
         badge.employee = contract.employee;

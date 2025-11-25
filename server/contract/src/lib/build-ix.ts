@@ -82,6 +82,34 @@ export async function buildExpireContractIx(
   return ix;
 }
 
+export async function buildMintBadgeIx(
+  program: Program<ContractProgram>,
+  employee: PublicKey,
+  platform: PublicKey,
+  contract: PublicKey,
+  escrow: PublicKey,
+  uri: string,
+  level: number
+): Promise<{ ix: TransactionInstruction; badge: PublicKey }> {
+  const [badge, _badgeBump] = PublicKey.findProgramAddressSync(
+    [Buffer.from("badge"), contract.toBuffer(), employee.toBuffer()],
+    program.programId
+  );
+
+  const ix = await program.methods
+    .mintBadge(uri, level as any)
+    .accounts({
+      employee,
+      platform,
+      contract,
+      escrow,
+      systemProgram: SystemProgram.programId,
+    } as any)
+    .instruction();
+
+  return { ix, badge };
+}
+
 export async function buildCloseEscrowIx(
   program: Program<ContractProgram>,
   platform: PublicKey,

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { Program, AnchorProvider, BN } from "@coral-xyz/anchor";
 import type { ContractProgram } from "@type/contract_program";

@@ -3,7 +3,8 @@ import { PublicKey } from "@solana/web3.js";
 import createContract from "../service/create";
 import endContract from "../service/end";
 import expireContract from "../service/expire";
-import loadContract from "../service/load";
+import mintBadge from "../service/mint";
+import { loadContract, loadBadge } from "../service/load";
 
 export default async function contractRoutes(app: FastifyInstance) {
   app.post("/contract/create", {
@@ -102,6 +103,38 @@ export default async function contractRoutes(app: FastifyInstance) {
     },
   });
 
+  app.post("/badge/mint", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["employee", "contract", "escrow", "level"],
+        properties: {
+          employee: { type: "string" },
+          contract: { type: "string" },
+          escrow: { type: "string" },
+          level: { type: "number" },
+        },
+      },
+    },
+    handler: async (req, reply) => {
+      const { employee, contract, escrow, level } = req.body as {
+        employee: string;
+        contract: string;
+        escrow: string;
+        level: number;
+      };
+
+      const result = await mintBadge(
+        new PublicKey(employee),
+        new PublicKey(contract),
+        new PublicKey(escrow),
+        level
+      );
+
+      reply.send(result);
+    },
+  });
+
   app.get("/contract/load", {
     schema: {
       querystring: {
@@ -117,6 +150,24 @@ export default async function contractRoutes(app: FastifyInstance) {
 
       const result = await loadContract(new PublicKey(contract));
       reply.send(result);
+    },
+  });
+
+  app.get("/badge/load", {
+    schema: {
+      querystring: {
+        type: "object",
+        required: ["badge"],
+        properties: {
+          badge: { type: "string" },
+        },
+      },
+    },
+    handler: async (req, reply) => {
+      const { badge } = req.query as { badge: string };
+
+      const badgeData = await loadBadge(new PublicKey(badge));
+      reply.send(badgeData);
     },
   });
 }
